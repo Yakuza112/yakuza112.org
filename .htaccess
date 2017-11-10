@@ -1,0 +1,345 @@
+# compress text, html, javascript, css, xml:
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+
+# Or, compress certain file types by extension:
+<files *.html>
+SetOutputFilter DEFLATE
+</files>
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType text/css "access plus 1 week"
+ExpiresByType application/javascript "access plus 1 month"
+ExpiresByType application/x-javascript "access plus 1 month"
+ExpiresByType image/gif "access plus 1 month"
+ExpiresByType image/jpeg "access plus 1 month"
+ExpiresByType image/png "access plus 1 month"
+ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+#ErrorDocument 403 https://twitter.com/Yakuza112/status/338786608616710145
+# Disable Server Signature
+ServerSignature Off
+
+###### Alles SSL  ######
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^(.*)$ https://yakuza112.org/$1 [R,L]
+
+# Disable Directory Browsing
+Options All -Indexes
+
+# HTACCESS File Security with Strong pattern matching
+<Files ~ "^.*\.([Hh][Tt][Aa])">
+Order allow,deny
+Deny from all
+Satisfy all
+</Files>
+
+###### User / Pass ######
+#AuthUserFile /home/yakuza11/home/yakuzaor/blog/.htpasswd
+#AuthType Basic
+#AuthName "123"
+#Require valid-user
+
+# Protect sensitive files from client-side viewing
+<FilesMatch "^(wp-config\.php|php\.ini|php5\.ini|php\.info|bb-config\.php|error_log|error\.log|PHP_errors\.log|\.svn)">
+Deny from all
+</FilesMatch>
+
+#Limit File Uploading to 10MB.
+LimitRequestBody 10240000
+
+#Block Empty User-Agents and Referrers
+#RewriteCond %{HTTP_REFERER} ^$ [NC]
+#RewriteCond %{HTTP_USER_AGENT} ^$ [NC]
+
+#RewriteRule ^(.*)\.(ico|gif|jpe?g|jpg|png|bmp|swf)$ - [F,L]
+
+#Filter Request Methods
+#This filter blocks junk and spam bots from making HEAD requests
+#This rule also helps prevent CST and XSS attacks
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(HEAD|TRACE|DELETE|TRACK|DEBUG) [NC]
+RewriteRule ^(.*)$ - [F,L]
+
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+
+#File injection Protection (rfi and lfi)
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http:// [OR]
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=(\.\.//?)+ [OR]
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=http%3A%2F%2F [OR]
+RewriteCond %{QUERY_STRING} [a-zA-Z0-9_]=/([a-z0-9_.]//?)+ [NC]
+RewriteRule .* - [F]
+
+# SQLi Protection
+Options +FollowSymLinks
+RewriteEngine On
+RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+RewriteRule ^(.*)$ index.php [F,L]
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+###### Alles SSL  ######
+#RewriteCond %{SERVER_PORT} 80 
+#RewriteRule ^(.*)$ https://yakuza112.org/$1 [R,L]
+
+###### Hinzufuegn von Slash ######
+RewriteCond %{REQUEST_URI} ^/[^\.]+[^/]$
+RewriteRule ^(.*)$ http://%{HTTP_HOST}/$1/ [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . 404.php/ [L]
+
+</IfModule>
+
+###### Disable Directory Listing ######
+Options -Indexes
+
+#php_flag display_errors off
+#php_flag log_errors off
+#php_flag register_globals off
+#php_flag session.use_trans_sid off
+
+#<Files 403.shtml>
+#order allow,deny
+#allow from all
+#</Files>
+
+###### PERISHABLE PRESS 4G BLACKLIST ######
+###### ESSENTIALS ######
+
+RewriteEngine on
+ServerSignature Off
+Options All -Indexes
+Options +FollowSymLinks
+###### FILTER REQUEST METHODS ######
+
+<IfModule mod_rewrite.c>
+ RewriteCond %{REQUEST_METHOD} ^(TRACE|DELETE|TRACK) [NC]
+ RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+#RewriteRule ^wp-trackback\.php.*$ - [F,L]
+###### BLACKLIST CANDIDATES ######
+<Limit GET POST PUT>
+ Order Allow,Deny
+ Allow from all
+ Deny from 75.126.85.215   "# blacklist candidate 2008-01-02 = admin-ajax.php attack "
+ Deny from 128.111.48.138  "# blacklist candidate 2008-02-10 = cryptic character strings "
+ Deny from 87.248.163.54   "# blacklist candidate 2008-03-09 = block administrative attacks "
+ Deny from 84.122.143.99   "# blacklist candidate 2008-04-27 = block clam store loser "
+ Deny from 210.210.119.145 "# blacklist candidate 2008-05-31 = block _vpi.xml attacks "
+ Deny from 66.74.199.125   "# blacklist candidate 2008-10-19 = block mindless spider running "
+ Deny from 203.55.231.100  "# 1048 attacks in 60 minutes"
+ Deny from 24.19.202.10    "# 1629 attacks in 90 minutes"
+</Limit>
+
+###### QUERY STRING EXPLOITS ######
+#<IfModule mod_rewrite.c>
+# RewriteCond %{QUERY_STRING} ../    [NC,OR]
+# RewriteCond %{QUERY_STRING} boot.ini [NC,OR]
+#RewriteCond %{QUERY_STRING} tag=     [NC,OR]
+# RewriteCond %{QUERY_STRING} ftp:     [NC,OR]
+# RewriteCond %{QUERY_STRING} http:    [NC,OR]
+# RewriteCond %{QUERY_STRING} https:   [NC,OR]
+# RewriteCond %{QUERY_STRING} mosConfig [NC,OR]
+# RewriteCond %{QUERY_STRING} ^.*([|]|(|)|<|>|'|"|;|?|*).* [NC,OR]
+# RewriteCond %{QUERY_STRING} ^.*(%22|%27|%3C|%3E|%5C|%7B|%7C).* [NC,OR]
+# RewriteCond %{QUERY_STRING} ^.*(%0|%A|%B|%C|%D|%E|%F|127.0).* [NC,OR]
+# RewriteCond %{QUERY_STRING} ^.*(globals|encode|localhost|loopback).* [NC,OR]
+# RewriteCond %{QUERY_STRING} ^.*(request|select|insert|union|declare|drop).* [NC]
+# RewriteRule ^(.*)$ - [F,L]
+#</IfModule>
+
+###### Datei zum Regeln von IP-Bereichen ######
+Order deny,allow
+Allow from all
+# Sperre folgende IPs
+#deny from 127.1.1.1
+
+##################################
+
+    # Added by HackRepair.com, for Bad Bot protection
+    Options -Indexes
+    RewriteEngine on
+    #Block comment spammers, bad bots and some proxies
+    RewriteCond %{REMOTE_HOST} 12.226.240.248 [OR]
+    RewriteCond %{REMOTE_HOST} 24.111.102.26 [OR]
+    RewriteCond %{REMOTE_HOST} 24.117.121.113 [OR]
+    RewriteCond %{REMOTE_HOST} 65.30.216.140 [OR]
+    RewriteCond %{REMOTE_HOST} 67.87.64.23 [OR]
+    RewriteCond %{REMOTE_HOST} 68.12.149.198 [OR]
+    RewriteCond %{REMOTE_HOST} 69.139.167.203 [OR]
+    RewriteCond %{REMOTE_HOST} 74.95.182.57 [OR]
+    RewriteCond %{REMOTE_HOST} 91.121.3.29 [OR]
+    RewriteCond %{REMOTE_HOST} 203.94.229.227 [OR]
+    RewriteCond %{REMOTE_HOST} 208.96.122.142 [OR]
+    RewriteCond %{REMOTE_HOST} 210.0.141.247 [OR]
+    RewriteCond %{REMOTE_HOST} 210.197.97.67 [OR]
+    RewriteCond %{REMOTE_HOST} 212.179.127.188 [OR]
+    RewriteCond %{REMOTE_HOST} 216.246.60.183 [OR]
+    RewriteCond %{REMOTE_HOST} 220.156.189.233 [OR]
+    RewriteCond %{REMOTE_HOST} 222.36.12.42 [OR]
+    # Abuse Agent Blocking
+    RewriteCond %{HTTP_USER_AGENT} ^BlackWidow [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Bolt\ 0 [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Bot\ mailto:craftbot\@yahoo\.com [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} CazoodleBot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^ChinaClaw [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Custo [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Default\ Browser\ 0 [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^DIIbot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^DISCo [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} discobot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Download\ Demon [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^eCatch [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ecxi [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^EirGrabber [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^EmailCollector [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^EmailSiphon [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^EmailWolf [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Express\ WebPictures [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^ExtractorPro [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^EyeNetIE [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^FlashGet [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^GetRight [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^GetWeb! [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Go!Zilla [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Go-Ahead-Got-It [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^GrabNet [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Grafula [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} GT::WWW [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} heritrix [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^HMView [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} HTTP::Lite [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} HTTrack [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ia_archiver [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} IDBot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} id-search [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} id-search\.org [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Image\ Stripper [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Image\ Sucker [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Indy\ Library [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^InterGET [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Internet\ Ninja [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^InternetSeer\.com [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} IRLbot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ISC\ Systems\ iRc\ Search\ 2\.1 [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Java [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^JetCar [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^JOC\ Web\ Spider [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^larbin [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^LeechFTP [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} libwww [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} libwww-perl [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Link [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} LinksManager.com_bot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} linkwalker [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} lwp-trivial [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Mass\ Downloader [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Maxthon$ [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} MFC_Tear_Sample [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^microsoft\.url [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Microsoft\ URL\ Control [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^MIDown\ tool [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Mister\ PiX [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Missigua\ Locator [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Mozilla\.*Indy [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Mozilla\.*NEWT [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^MSFrontPage [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Navroad [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^NearSite [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^NetAnts [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^NetSpider [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Net\ Vampire [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^NetZIP [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Nutch [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Octopus [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Offline\ Explorer [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Offline\ Navigator [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^PageGrabber [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} panscient.com [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Papa\ Foto [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^pavuk [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} PECL::HTTP [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^PeoplePal [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^pcBrowser [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} PHPCrawl [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} PleaseCrawl [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^psbot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^RealDownload [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^ReGet [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Rippers\ 0 [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} SBIder [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^SeaMonkey$ [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^sitecheck\.internetseer\.com [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^SiteSnagger [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^SmartDownload [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Snoopy [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Steeler [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^SuperBot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^SuperHTTP [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Surfbot [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^tAkeOut [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Teleport\ Pro [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Toata\ dragostea\ mea\ pentru\ diavola [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} URI::Fetch [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} urllib [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} User-Agent [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^VoidEYE [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Web\ Image\ Collector [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Web\ Sucker [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Web\ Sucker [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} webalta [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebAuto [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Bb]andit [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} WebCollage [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebCopier [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebFetch [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebGo\ IS [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebLeacher [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebReaper [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebSauger [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Website\ eXtractor [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Website\ Quester [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebStripper [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebWhacker [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WebZIP [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Wells\ Search\ II [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} WEP\ Search [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Wget [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Widow [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WWW-Mechanize [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^WWWOFFLE [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Xaldon\ WebSpider [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} Yandex [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} zermelo [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Zeus [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^Zeus\.*Webster [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ZyBorg [NC]
+    RewriteRule ^.* - [F,L]
+	
+    # Abuse bot blocking rule end
+    order allow,deny
+    allow from all
+
+
+AddType font/truetype ttf
+AddType font/opentype otf
+AddType application/vnd.ms-fontobject eot
+AddType application/font-woff woff
